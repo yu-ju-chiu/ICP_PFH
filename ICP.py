@@ -25,11 +25,11 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
     for iterations in range(max_iterations):
         start = time.process_time()
         temp_error = error
-        
+
         if cfg['Method'] == "PFH":
             # Point Feature Histograms algorithm
             ###################################
-            matching = PFH(cfg['Div'], cfg['N_neighbors'], cfg['Radius']) 
+            matching = PFH(cfg['Bin'], cfg['N_neighbors'], cfg['Radius']) 
             indices, distances = matching.match(pc_aligned, pc_target)
             ###################################
         else:

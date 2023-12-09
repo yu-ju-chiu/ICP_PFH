@@ -1,13 +1,6 @@
 #!/usr/bin/env python
-import utils
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.special as sp
-import time
-
-# N_neighbors = 8
-# Radius = 0.03
-# Div = 2
 
 class PFH(object):
     """Parent class for PFH"""
@@ -37,14 +30,13 @@ class PFH(object):
         :pc: point cloud
         :returns: k nearest neighbors
         """
-        k = self.num_neighbors
         neighbors = []
         dist = np.linalg.norm(pq-pc, axis = 1)
         neighbors_idx = np.where(dist <= self.radius)[0]
-        neighbors_val = dist[np.where(dist <= self.radius)]
+        neighbors_val = dist[neighbors_idx]
         neighbors = np.array([neighbors_idx, neighbors_val]).T
         sorted_indices = np.argsort(neighbors[:, 1])
-        neighbors = neighbors[sorted_indices][1:k+1]
+        neighbors = neighbors[sorted_indices][1:self.num_neighbors + 1]
         return neighbors
 
     def calc_normals(self, pc):
