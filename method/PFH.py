@@ -65,13 +65,15 @@ class PFH(object):
                 normal = -1.*normal
             normals.append(normal)
 
-        return normals, ind_of_neighbors
+        return np.asarray(normals), ind_of_neighbors
+    
     def calcHistArray(self, pc, normal, indNeigh):
         print("\tCalculating histograms naive method \n")
 
         N = len(pc)
 
         histograms = np.zeros((N, self.bin**3))
+<<<<<<< HEAD
         for i in range(1):
             
             N_features = sp.comb(self.num_neighbors + 1, 2)
@@ -98,11 +100,34 @@ class PFH(object):
                     features.append(np.array([alpha, phi, theta]))
             features = np.asarray(features)
 
+=======
+        for i in range(N):
+            N_features = sp.comb(self.num_neighbors + 1, 2)
+            point_ids = np.append(indNeigh[i], [i])
+            point_pairs = np.array(np.meshgrid(point_ids, point_ids)).reshape(-1, 2)
+            point_pairs = point_pairs[point_pairs[:, 0] != point_pairs[:, 1]]
+            s = point_pairs[:, 0]
+            t = point_pairs[:, 1]
+            ps = pc[s]
+            pt = pc[t]
+            ns = normal[s].squeeze()
+            nt = normal[t].squeeze()
+            u = ns
+            d = np.linalg.norm(np.abs(pt - ps), axis=1, keepdims=True)
+            temp = (pt - ps)/d
+            v = np.cross(temp, u)
+            w = np.cross(u, v)
+            alpha = np.sum(v @ nt.T, axis=1)
+            phi = np.asarray(np.sum(u @ temp.T, axis=1)).squeeze()
+            theta = np.arctan(np.sum(w @ nt.T, axis=1) / np.sum(u @ nt.T, axis=1))
+            features = np.array([alpha, phi, theta]).T
+>>>>>>> 5baa013c2fc7ca6e41092992608d705316614673
 
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
         print("histograms",histograms.shape)
         return histograms
+<<<<<<< HEAD
     # def calcHistArray(self, pc, normal, indNeigh):
     #     print("\tCalculating histograms optimized method \n")
 
@@ -145,6 +170,9 @@ class PFH(object):
         
 
     #     return histograms
+=======
+    
+>>>>>>> 5baa013c2fc7ca6e41092992608d705316614673
     def calc_thresholds(self):
         """
         :returns: feature's thresholds (3x(self.bin-1))
@@ -155,11 +183,11 @@ class PFH(object):
         return np.array(thresholds)
 
     def cal_bin(self, si, fi):
-        result = 0
-        for i, s in enumerate(si):
-            if fi >= s:
-                result = i+1
-        return result
+        # result = 0
+        # for i, s in enumerate(si):
+        #     if fi >= s:
+        #         result = i+1
+        return np.searchsorted(si, fi)
 
     def calc_hist(self, feature):
         """Calculate histogram and bin edges.
@@ -169,22 +197,24 @@ class PFH(object):
             hist - array of length div^3, represents number of samples per bin
             bin_edges - range(0, 1, 2, ..., (div^3+1)) 
         """
-        # preallocate array sizes, create bin_edges
-        # only 3 feature
-        hist, edges = np.zeros(self.bin**3), np.arange(0,self.bin**3+1)
+        # # preallocate array sizes, create bin_edges
+        # # only 3 feature
+        # hist, edges = np.zeros(self.bin**3), np.arange(0,self.bin**3+1)
         
-        # find the division thresholds for the histogram
-        threshold = self.calc_thresholds()
-        # Loop for every row in f from 0 to N
-        for j in range(0, feature.shape[0]):
-            # calculate the bin index to increment
-            index = 0
-            for i in range(3):
-                index += self.cal_bin(threshold[i, :], feature[j, i]) * (self.bin**(i))
-            # Increment histogram at that index
-            hist[index] += 1
+        # # find the division thresholds for the histogram
+        # threshold = self.calc_thresholds()
+        # # Loop for every row in f from 0 to N
+        # for j in range(0, feature.shape[0]):
+        #     # calculate the bin index to increment
+        #     index = 0
+        #     for i in range(3):
+        #         index += self.cal_bin(threshold[i, :], feature[j, i]) * (self.bin**(i))
+        #     # Increment histogram at that index
+        #     hist[index] += 1
         
-        return hist, edges
+        # return hist, edges
+        hist, edges = np.histogramdd(feature, bins=self.bin)
+        return hist.flatten(), edges[0]
 
     def match(self, ps, pt):
         """Find matches from source to target points
@@ -206,16 +236,19 @@ class PFH(object):
         norm_t,ind_nei_t = self.calc_normals(pt)
         hist_t = self.calcHistArray(pt, norm_t, ind_nei_t)
         
-        dist = []
-        matchInd = []
-        distances = []
-        for i in range(num_s):
-            for j in range(num_t):
-                #appending the l2 norm and j
-                dist.append((np.linalg.norm(hist_s[i]-hist_t[j]),j))
-            dist.sort(key=lambda x:x[0]) #To sort by first element of the tuple
-            matchInd.append(dist[0][1])
-            distances.append(dist[0][0])
-            dist = []
+        # dist = []
+        # matchInd = []
+        # distances = []
+        # for i in range(num_s):
+        #     for j in range(num_t):
+        #         #appending the l2 norm and j
+        #         dist.append((np.linalg.norm(hist_s[i]-hist_t[j]),j))
+        #     dist.sort(key=lambda x:x[0]) #To sort by first element of the tuple
+        #     matchInd.append(dist[0][1])
+        #     distances.append(dist[0][0])
+        #     dist = []
         
+        distances = np.linalg.norm(hist_s[:, np.newaxis] - hist_t, axis=2)
+        matchInd = np.argmin(distances, axis=1)
+        distances = np.min(distances, axis=1)
         return matchInd, distances
