@@ -72,14 +72,16 @@ class PFH(object):
         N = len(pc)
 
         histograms = np.zeros((N, self.bin**3))
-        for i in range(N):
+        for i in range(1):
             
             N_features = sp.comb(self.num_neighbors + 1, 2)
             features = []
             source_pair = np.append(indNeigh[i], [i])
             target_pair = np.append(indNeigh[i], [i])
             for s in source_pair:
+                print("source_pair",source_pair)
                 target_pair = target_pair[1:]
+                print("target_pair",target_pair)
                 for t in target_pair:
                     ps = pc[s]
                     pt = pc[t]
@@ -94,13 +96,55 @@ class PFH(object):
                     phi = np.dot(u, temp)
                     theta = np.arctan(np.dot(w, nt) / np.dot(u, nt))
                     features.append(np.array([alpha, phi, theta]))
-                
             features = np.asarray(features)
 
 
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
+        print("histograms",histograms.shape)
         return histograms
+    # def calcHistArray(self, pc, normal, indNeigh):
+    #     print("\tCalculating histograms optimized method \n")
+
+    #     N = len(pc)
+    #     N_features = sp.comb(self.num_neighbors + 1, 2)
+
+    #     histograms = np.zeros((N, self.bin**3))
+
+    #     for i in range(N):
+
+    #         source_pair = np.append(indNeigh[i], [i])
+    #         target_pair = np.append(indNeigh[i], [i])
+
+    #         ps = pc[source_pair]
+    #         pt = pc[target_pair]
+    #         normal = np.array(normal)
+
+    #         ns = np.asarray(normal[source_pair]).squeeze()
+    #         nt = np.asarray(normal[target_pair]).squeeze()
+
+    #         u = ns
+    #         d = np.linalg.norm(np.abs(pt - ps), axis=1)
+    #         temp = np.asarray((pt - ps) / d.reshape(-1, 1)).squeeze()
+    #         v = np.cross(temp, u)
+    #         w = np.cross(u, v)
+
+    #         # alpha = np.dot(v, nt.T)
+    #         alpha = np.sum(v * nt,axis=1)
+    #         # print("alpha",alpha.shape)
+    #         phi = np.sum(u * temp,axis=1)
+    #         # phi = np.dot(u.T, temp)
+    #         # theta = np.arctan2(np.dot(w, nt), np.dot(u, nt))
+    #         theta = np.arctan2(np.sum(w * nt,axis=1), np.sum(u * nt,axis=1))
+
+    #         features = np.column_stack([alpha, phi, theta])
+
+    #         hist, edges = self.calc_hist(features)
+    #         histograms[i, :] = hist / N_features
+    #         print("histograms",histograms.shape)
+        
+
+    #     return histograms
     def calc_thresholds(self):
         """
         :returns: feature's thresholds (3x(self.bin-1))
