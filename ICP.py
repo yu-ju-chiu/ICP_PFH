@@ -9,7 +9,15 @@ import time
 from method.PFH import PFH
 import yaml
 
-
+def cal_error(Cp, Cq):
+    """
+    Calculate the transformation error. Assume Cp and Cq have 1-to-1 correspondences.
+    """
+    err = np.linalg.norm(Cp-Cq, axis = 1)
+    # print("err", err.shape)
+    err = np.sum(err**2)
+    # print("err", err.shape)
+    return err
 def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
     with open("./config/config.yaml", 'r') as stream:
         cfg = yaml.safe_load(stream)
@@ -37,13 +45,15 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
             tree = cKDTree(pc_target)
             distances, indices = tree.query(pc_aligned)
             ###################################
-        # calculate error
-        error = np.linalg.norm(distances)
-        errors.append(error)
                 
         # Extract corresponding points
         source_points = pc_aligned[ps_list]
         target_points = pc_target[pt_list][indices, :]
+
+        # calculate error
+        # error = np.linalg.norm(distances)
+        error = cal_error(source_points, target_points)
+        errors.append(error)
 
         # Calculate the transformation (Rigid Transformation) using SVD
         avg_p = np.mean (source_points, axis=0)
@@ -51,7 +61,7 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
         source_points = source_points - avg_p
         target_points = target_points - avg_q
         H =  source_points.T @ target_points
-        U, _, Vt = np.linalg.svd(H)
+        U, _, Vt = np.linalg.svd(H) 
         V = Vt.T
         reflection = np.diag([1, 1, np.linalg.det(V @ U.T)])
         R = V @ reflection @ U.T
