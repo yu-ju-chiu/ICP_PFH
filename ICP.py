@@ -4,7 +4,6 @@ ICP algorithm
 """
 import utils
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.spatial import cKDTree
 import time
 from method.PFH import PFH
@@ -30,7 +29,7 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
             # Point Feature Histograms algorithm
             ###################################
             matching = PFH(cfg['Bin'], cfg['N_neighbors'], cfg['Radius']) 
-            indices, distances = matching.match(pc_aligned, pc_target)
+            indices, distances, ps_list, pt_list = matching.match(pc_aligned, pc_target, cfg['Curvature_thres'])
             ###################################
         else:
             # tranditional mehtod: cal distance
@@ -43,8 +42,8 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
         errors.append(error)
                 
         # Extract corresponding points
-        source_points = pc_aligned
-        target_points = pc_target[indices, :]
+        source_points = pc_aligned[ps_list]
+        target_points = pc_target[pt_list][indices, :]
 
         # Calculate the transformation (Rigid Transformation) using SVD
         avg_p = np.mean (source_points, axis=0)
@@ -72,31 +71,39 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
         end = time.process_time()
         print("Time per iteration: ", end - start)
         print("===============================\n\n")
-    return pc_aligned, errors
+    return pc_aligned, errors, ps_list, pt_list
 
 
-def main():
-    #Import the cloud
-    pc_source = utils.load_pc('data/cloud_icp_source.csv')
-    pc_target = utils.load_pc('data/cloud_icp_target3.csv') # Change this to load in a different target
+# def main():
+#     # Import the cloud
+#     pc_source = utils.load_pc('data/mug/cloud_icp_source.csv')
+#     pc_target = utils.load_pc('data/mug/cloud_icp_target3.csv') # Change this to load in a different target
 
-    utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
+#     utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
 
-    # Run ICP
-    pc_aligned, errors = icp(pc_source, pc_target)
+#     # Run ICP
+#     pc_aligned, errors, ps_list, pt_list = icp(pc_source, pc_target)
 
-    pc_aligned = utils.convert_matrix_to_pc(pc_aligned.T)
+#     # Plot the original pc
+#     pc_aligned = utils.convert_matrix_to_pc(pc_aligned.T)
+#     utils.view_pc([pc_aligned, pc_target], None, ['b', 'r'], ['o', '^'])
 
-    utils.view_pc([pc_aligned, pc_target], None, ['b', 'r'], ['o', '^'])
-    plt.show()
+#     # Plot simplify point cloud
+#     ps = utils.convert_pc_to_matrix(pc_source)[:, ps_list]
+#     ps2 = utils.convert_matrix_to_pc(ps)
+#     pt = utils.convert_pc_to_matrix(pc_target)[:, pt_list]
+#     pt2 = utils.convert_matrix_to_pc(pt)
+#     utils.view_pc([ps2, pt2], None, ['g', 'b'], ['x', '<'])
 
-    #Plot the result
-    index = np.arange(1,len(errors)+1,1) 
-    plt.plot(index, errors, color='blue')
-    plt.xlabel('Iteration')  
-    plt.ylabel('Error')  
-    plt.show()
+#     plt.show()
+
+#     # Plot the result
+#     index = np.arange(1,len(errors)+1,1) 
+#     plt.plot(index, errors, color='blue')
+#     plt.xlabel('Iteration')  
+#     plt.ylabel('Error')  
+#     plt.show()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
