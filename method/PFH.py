@@ -39,7 +39,7 @@ class PFH(object):
         neighbors = neighbors[sorted_indices][1:self.num_neighbors + 1]
         return neighbors
 
-    def calc_normals(self, pc):
+    def calc_normals(self, pc, curv_thres):
         """ Docstring for calc_normals.
         :pc: point cloud
         :returns: normal vector
@@ -63,8 +63,11 @@ class PFH(object):
             _, S, Vt = np.linalg.svd(y)
             
             # Curvature to decide which points to use in histogram
-            K = S[0]/np.sum(S)
-            if K>0.55: 
+            if curv_thres != 0.0:
+                K = S[0]/np.sum(S)
+                if K>curv_thres: 
+                    filtered_pc_list.append(i)
+            else:
                 filtered_pc_list.append(i)
             
             normal = Vt[2,:]
@@ -129,7 +132,7 @@ class PFH(object):
         hist, edges = np.histogramdd(feature, bins=self.bin)
         return hist.flatten(), edges[0]
 
-    def match(self, ps, pt):
+    def match(self, ps, pt, curv_thres):
         """Find matches from source to target points
 
         :pcS: Source point cloud
@@ -139,14 +142,21 @@ class PFH(object):
         """
         print("...Matching point clouds. \n")
         print("...Processing source point cloud...\n")
-        norm_s, ind_nei_s, filtered_ps_list = self.calc_normals(ps)
+        norm_s, ind_nei_s, filtered_ps_list = self.calc_normals(ps, curv_thres)
         hist_s = self.calcHistArray(ps, norm_s, ind_nei_s, filtered_ps_list)
         
         print("...Processing target point cloud...\n")
-        norm_t, ind_nei_t, filtered_pt_list = self.calc_normals(pt)
+        norm_t, ind_nei_t, filtered_pt_list = self.calc_normals(pt, curv_thres)
         hist_t = self.calcHistArray(pt, norm_t, ind_nei_t, filtered_pt_list)
 
         distances = np.linalg.norm(hist_s[filtered_ps_list, np.newaxis] - hist_t[filtered_pt_list], axis=2)
         matchInd = np.argmin(distances, axis=1)
         distances = np.min(distances, axis=1)
+
+        # Filter matches based on the distance threshold
+        valid_matches = distances < 0.3
+        matchInd = matchInd[valid_matches]
+        distances = distances[valid_matches]
+        filtered_ps_list = np.array(filtered_ps_list)[valid_matches].tolist()
+
         return matchInd, distances, filtered_ps_list, filtered_pt_list
