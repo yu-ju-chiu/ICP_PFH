@@ -70,8 +70,8 @@ class PFH(object):
         for i in pc_list:
             N_features = sp.comb(self.num_neighbors + 1, 2)
             point_ids = np.append(indNeigh[i], [i])
-            point_pairs = np.array(np.meshgrid(point_ids, point_ids)).reshape(-1, 2)
-            point_pairs = point_pairs[point_pairs[:, 0] != point_pairs[:, 1]]
+            point_pairs = np.array(np.meshgrid(point_ids, point_ids)).T.reshape(-1, 2)
+            point_pairs = point_pairs[point_pairs[:, 0] < point_pairs[:, 1]]
             s = point_pairs[:, 0]
             t = point_pairs[:, 1]
             ps = pc[s]
