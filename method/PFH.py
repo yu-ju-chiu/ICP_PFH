@@ -8,21 +8,6 @@ class PFH(object):
         self.bin = bin
         self.num_neighbors = N_neighbors
         self.radius = Radius
-    
-    def getNeighbors(self, pq, pc):
-        """Get k nearest neighbors of the query point pq from pc, within the radius
-        :pq: the query point pq
-        :pc: point cloud
-        :returns: k nearest neighbors
-        """
-        k = self.num_neighbors
-        neighbors = []
-        for i in range(len(pc)):
-            dist = np.linalg.norm(pq-pc[i])
-            if dist <= self.radius:
-                neighbors.append((dist, i))
-        neighbors.sort(key=lambda x:x[0])
-        return neighbors[1:k+1]
 
     def get_neighbors(self, pq, pc):
         """Get k nearest neighbors of the query point pq from pc, within the radius
