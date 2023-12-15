@@ -1,5 +1,39 @@
 import numpy as np
 import pandas as pd
+import open3d as o3d
+import utils
+import matplotlib.pyplot as plt
+
+def pcd_to_csv(input_pcd_file, output_csv_file):
+    # Read PCD file
+    point_cloud = o3d.io.read_point_cloud(input_pcd_file)
+
+    # Extract points as a NumPy array
+    points = np.asarray(point_cloud.points)
+
+    # Create a DataFrame
+    df = pd.DataFrame(data=points)
+
+    # Save DataFrame to CSV file
+    df.to_csv(output_csv_file, index=False)
+
+def slipt_two(input_csv_file, forward_csv_file, backward_csv_file):
+    # Load the CSV file into a DataFrame
+    df = pd.read_csv(input_csv_file)
+
+    # Extract the point coordinates as a NumPy array
+    points = df.values
+
+    split_index_f = len(points) * 2 // 3
+    split_index_b = len(points) * 1 // 3
+
+    # Create DataFrames for forward and backward parts
+    forward_df = pd.DataFrame(data=points[:split_index_f])
+    backward_df = pd.DataFrame(data=points[split_index_b:])
+
+    # Save DataFrames to CSV files
+    forward_df.to_csv(forward_csv_file, index=False)
+    backward_df.to_csv(backward_csv_file, index=False)
 
 def rotate_and_translate(input_file, output_file, rotation_matrix, translation_vector):
     # Load the CSV file into a DataFrame

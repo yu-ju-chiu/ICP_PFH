@@ -2,6 +2,7 @@
 import numpy as np
 import scipy.special as sp
 import matplotlib.pyplot as plt
+from scipy.special import rel_entr
 
 class PFH(object):
     """Parent class for PFH"""
@@ -97,9 +98,22 @@ class PFH(object):
             # print(features)
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
-        
+            
         return histograms
-    
+    def plot_hist(self, hist_s, hist_t):
+
+        WIDTH = 0.4
+        index_s = np.arange(1,(self.bin**3)+1,1)
+        index_t = index_s - WIDTH/2
+        for i in range(1):
+
+            plt.show()
+            plt.bar(index_s, hist_s[i], color='blue' ,width=WIDTH, align='edge')
+            plt.bar(index_t, hist_t[i], color='red' ,width=WIDTH)
+            plt.xlabel('Bins')  
+            plt.ylabel('Ration of point one bin')
+        
+
     def calc_thresholds(self):
         """
         :returns: feature's thresholds (3x(self.bin-1))
@@ -125,6 +139,7 @@ class PFH(object):
         hist, edges = np.histogramdd(feature, bins=(bin_edges, bin_edges, bin_edges))
         return hist.flatten(), edges[0]
 
+
     def match(self, ps, pt, curv_thres):
         """Find matches from source to target points
 
@@ -138,9 +153,11 @@ class PFH(object):
         norm_s, ind_nei_s, filtered_ps_list = self.calc_normals(ps, curv_thres)
         hist_s = self.calcHistArray(ps, norm_s, ind_nei_s, filtered_ps_list)
         
+        
         print("...Processing target point cloud...\n")
         norm_t, ind_nei_t, filtered_pt_list = self.calc_normals(pt, curv_thres)
         hist_t = self.calcHistArray(pt, norm_t, ind_nei_t, filtered_pt_list)
+        # self.plot_hist(hist_s, hist_t)
 
         distances = np.linalg.norm(hist_s[filtered_ps_list, np.newaxis] - hist_t[filtered_pt_list], axis=2)
         matchInd = np.argmin(distances, axis=1)
