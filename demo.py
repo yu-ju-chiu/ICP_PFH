@@ -13,8 +13,8 @@ def main():
     # pc_source = utils.load_pc('data/bunny/bunny_1.csv')
     # pc_target = utils.load_pc('data/bunny/bunny_2.csv')
     # # cat
-    pc_source = utils.load_pc('data/cat/cat_1_ran.csv')
-    pc_target = utils.load_pc('data/cat/cat_2_rot_trad.csv')
+    pc_source = utils.load_pc('data/cat/cat_1_f.csv')
+    pc_target = utils.load_pc('data/cat/cat_2_b.csv')
     
 
 

@@ -100,7 +100,6 @@ class PFH(object):
         index_s = np.arange(1,(self.bin**3)+1,1)
         index_t = index_s - WIDTH/2
         for i in range(1):
-
             plt.show()
             plt.bar(index_s, hist_s[i], color='blue' ,width=WIDTH, align='edge')
             plt.bar(index_t, hist_t[i], color='red' ,width=WIDTH)
