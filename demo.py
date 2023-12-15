@@ -21,6 +21,7 @@ def main():
     # pc_target = utils.load_pc('data/cat/horse_1.csv')
 
     utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
+    plt.title("Cat point clouds initial")
 
     # Run ICP
     pc_aligned, errors, ps_list, pt_list = icp(pc_source, pc_target)
@@ -28,23 +29,22 @@ def main():
     # Plot the original pc
     pc_aligned = utils.convert_matrix_to_pc(pc_aligned.T)
     utils.view_pc([pc_aligned, pc_target], None, ['b', 'r'], ['o', '^'])
+    plt.title("Cat point clouds after ICP-PFH alignment")
 
     # Plot simplify point cloud
     ps = utils.convert_pc_to_matrix(pc_source)[:, ps_list]
     ps2 = utils.convert_matrix_to_pc(ps)
     pt = utils.convert_pc_to_matrix(pc_target)[:, pt_list]
     pt2 = utils.convert_matrix_to_pc(pt)
-    # fig2 = utils.view_pc([ps2, pt2], None, ['g', 'b'], ['x', '<'])
-    # draw_lines_3d_numpy(sss, ttt, fig2)
 
     plt.show()
 
-    # Plot the result
-    index = np.arange(1,len(errors)+1,1) 
-    plt.plot(index, errors, color='blue')
-    plt.xlabel('Iteration')  
-    plt.ylabel('Error')  
-    plt.show()
+    # # Plot the result
+    # index = np.arange(1,len(errors)+1,1) 
+    # plt.plot(index, errors, color='blue')
+    # plt.xlabel('Iteration')  
+    # plt.ylabel('Error')  
+    # plt.show()
 
 if __name__ == '__main__':
     main()
