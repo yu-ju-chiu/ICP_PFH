@@ -10,10 +10,10 @@ def main():
     pc_source = utils.load_pc('data/mug/cloud_icp_source.csv')
     pc_target = utils.load_pc('data/mug/cloud_icp_target3.csv')
     # # bunny
-    # pc_source = utils.load_pc('data/bunny/bunny_1.csv')
-    # pc_target = utils.load_pc('data/bunny/bunny_2.csv')
+    # pc_source = utils.load_pc('data/bunny/bunny_0_500.csv')
+    # pc_target = utils.load_pc('data/bunny/bunny_1_500.csv')
 
-    utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
+    # utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
 
     # Run ICP
     pc_aligned, errors, ps_list, pt_list = icp(pc_source, pc_target)

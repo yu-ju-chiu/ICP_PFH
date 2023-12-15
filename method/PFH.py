@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import scipy.special as sp
+import matplotlib.pyplot as plt
 
 class PFH(object):
     """Parent class for PFH"""
@@ -74,20 +75,26 @@ class PFH(object):
             point_pairs = point_pairs[point_pairs[:, 0] < point_pairs[:, 1]]
             s = point_pairs[:, 0]
             t = point_pairs[:, 1]
-            ps = pc[s]
-            pt = pc[t]
+            ps = np.asarray(pc[s])
+            pt = np.asarray(pc[t])
             ns = normal[s].squeeze()
             nt = normal[t].squeeze()
+            dot_1 = np.einsum('ij,ij->i', ns, pt - ps)
+            dot_2 = np.einsum('ij,ij->i', nt, ps - pt)
+            indices = np.where(dot_1 > dot_2)[0]
+            ps[indices], pt[indices] = pt[indices], ps[indices]
             u = ns
             d = np.linalg.norm(np.abs(pt - ps), axis=1, keepdims=True)
             temp = (pt - ps)/d
-            v = np.cross(temp, u)
+            v = np.cross(u, temp)
+            v = v / np.linalg.norm(v, axis=1, keepdims=True)
             w = np.cross(u, v)
-            alpha = np.sum(v @ nt.T, axis=1)
-            phi = np.asarray(np.sum(u @ temp.T, axis=1)).squeeze()
-            theta = np.arctan(np.sum(w @ nt.T, axis=1) / np.sum(u @ nt.T, axis=1))
+            alpha = np.sum(v * nt, axis=1)
+            phi = np.asarray(np.sum(u * temp, axis=1))
+            theta = np.arctan(np.sum(w * nt, axis=1) / np.sum(u * nt, axis=1))
             features = np.array([alpha, phi, theta]).T
 
+            # print(features)
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
         
@@ -113,8 +120,9 @@ class PFH(object):
             hist - array of length div^3, represents number of samples per bin
             bin_edges - range(0, 1, 2, ..., (div^3+1)) 
         """
-
-        hist, edges = np.histogramdd(feature, bins=self.bin)
+        # bin_edges = np.linspace(-1, 1, self.bin+1)
+        bin_edges = [-1, 0, 1]
+        hist, edges = np.histogramdd(feature, bins=(bin_edges, bin_edges, bin_edges))
         return hist.flatten(), edges[0]
 
     def match(self, ps, pt, curv_thres):
@@ -135,13 +143,61 @@ class PFH(object):
         hist_t = self.calcHistArray(pt, norm_t, ind_nei_t, filtered_pt_list)
 
         distances = np.linalg.norm(hist_s[filtered_ps_list, np.newaxis] - hist_t[filtered_pt_list], axis=2)
-        matchInd = np.argmin(distances, axis=1)
-        distances = np.min(distances, axis=1)
+        # matchInd = np.argmin(distances, axis=1)
+        # distances = np.min(distances, axis=1)
+        # print(matchInd.shape)
 
-        # Filter matches based on the distance threshold
-        valid_matches = distances < 0.3
-        matchInd = matchInd[valid_matches]
-        distances = distances[valid_matches]
-        filtered_ps_list = np.array(filtered_ps_list)[valid_matches].tolist()
+        ## compute E2 set
+        neighbors = 5
+        ps = np.asarray(ps)
+        pt = np.asarray(pt)
+        candidates = np.argpartition(distances, neighbors, axis=1)[:, :5]
+        ids = np.array(filtered_ps_list)
+        pairs = np.array(np.meshgrid(ids, ids)).T.reshape(-1, 2)
+        pairs = pairs[pairs[:, 0] < pairs[:, 1]]
+        i = pairs[:, 0]
+        j = pairs[:, 1]
+        print(ids.shape, i.shape, j.shape)
+
+        ids = range(5)
+        pairs = np.array(np.meshgrid(ids, ids)).T.reshape(-1, 2)
+        pairs = pairs[pairs[:, 0] < pairs[:, 1]]
+        r = pairs[:, 0]
+        s = pairs[:, 1]
+        val1 = np.linalg.norm(ps[filtered_ps_list][i] - ps[filtered_ps_list][j], axis=1)[:, None]
+        val2 = np.linalg.norm(pt[filtered_pt_list][candidates[i]][:, r] - pt[filtered_pt_list][candidates[j]][:, s], axis=2)
+        obj = np.abs(val1 - val2)
+        print(val1.shape, val2.shape)
+        min_rs = np.argmin(obj, axis=1)
+        E2 = np.vstack((i, j, r[min_rs], s[min_rs])).T
+        print(E2.shape)
+
+        ## collect pairs from E2 set
+
+
+        # neighbors = 8
+        # candidates = np.argpartition(distances, neighbors, axis=1)[:, :8]
+        # for candidate in candidates:
+        #     print(candidate)
+
+        #     candidate_ids = candidate
+        #     candidate_pairs = np.array(np.meshgrid(candidate_ids, candidate_ids)).T.reshape(-1, 2)
+        #     candidate_pairs = candidate_pairs[candidate_pairs[:, 0] < candidate_pairs[:, 1]]
+        #     i = candidate_pairs[:, 0]
+        #     j = candidate_pairs[:, 1]
+        #     ps[i] - ps[j]
+
+
+        # plt.bar(np.linspace(0,7,8), hist_s[0], width=0.4)
+        # plt.bar(np.linspace(0.5,7.5,8), hist_t[matchInd[0]], width=0.4)
+        # plt.show()
+
+
+        # # Filter matches based on the distance threshold
+        # valid_matches = distances < 0.1
+        # matchInd = matchInd[valid_matches]
+        # distances = distances[valid_matches]
+        # filtered_ps_list = np.array(filtered_ps_list)[valid_matches].tolist()
+        # print(matchInd.shape)
 
         return matchInd, distances, filtered_ps_list, filtered_pt_list
