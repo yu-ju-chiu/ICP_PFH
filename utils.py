@@ -82,7 +82,7 @@ def view_pc(pcs, fig=None, color='b', marker='o', title=None):
             y.append(pt[1, 0])
             z.append(pt[2, 0])
 
-        ax.scatter3D(x, y, z, color=c, marker=m)
+        ax.scatter3D(x, y, z, color=c, marker=m, s=2, alpha=0.6)
 
     # Set the labels
     ax.set_xlabel('X')

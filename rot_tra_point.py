@@ -70,6 +70,7 @@ def pick_random_points(input_file, output_file, num_points_to_pick):
     # Save the selected points to a new CSV file without header
     selected_points.to_csv(output_file, index=False, header=False)
 # Example usage:
+<<<<<<< HEAD
 input_pcd = 'data/cat/ism_test_cat.pcd'
 output_pcd = 'data/cat/cat_0.csv'
 output_csv_random = 'data/cat/cat_0_ran.csv'
@@ -97,12 +98,39 @@ translation_vector = np.array([0.01, 0.01, 0.05])
 
 # inverse_translation_vector = np.array([[0.13584385],[0.04252106],[0.03461734]])
 
+=======
+input_csv = 'data/cat/cat_2.csv'
+output_csv_random = 'data/cat/cat_2_ran.csv'
+output_csv = 'data/cat/cat_2_rot_trad.csv'
+
+# Define rotation matrix and translation vector
+rotation_matrix = np.array([[0.8660254, -0.5, 0],
+                           [0.5, 0.8660254, 0],
+                           [0, 0, 1]])
+
+# Check if the matrix is orthogonal
+is_orthogonal = np.allclose(np.dot(rotation_matrix, rotation_matrix.T), np.eye(3))
+print("Is orthogonal:", is_orthogonal)
+
+# Check if the determinant is 1
+det = np.linalg.det(rotation_matrix)
+print("Determinant:", det)
+
+# Check if transpose is equal to inverse
+is_transpose_equal_inverse = np.allclose(rotation_matrix.T, np.linalg.inv(rotation_matrix))
+print("Transpose is equal to inverse:", is_transpose_equal_inverse)
+
+translation_vector = np.array([100, 20, 30])
+# rotation_matrix = np.eye(3)
+# translation_vector = np.array([50, 0, 0])
+>>>>>>> a2524a27a69cad5522f33816f701d5b8b0e8c05d
 
 # # Calculate the inverse transformation
 # inverse_rotation_matrix = np.linalg.inv(rotation_matrix)
 # inverse_translation_vector = -translation_vector
 
 
+<<<<<<< HEAD
 rotate_and_translate(output_csv_b, output_csv_b_inv, rotation_matrix, translation_vector)
 
 # pcd_to_csv(input_pcd, output_pcd)
@@ -118,3 +146,10 @@ pc_target = utils.load_pc(output_csv_b_inv)
 
 utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
 plt.show()
+=======
+# rotate_and_translate(input_csv, output_csv, inverse_rotation_matrix, inverse_translation_vector)
+num_points_to_pick = 1500
+# pick_random_points(input_csv, output_csv_random, num_points_to_pick)
+
+rotate_and_translate(input_csv, output_csv, rotation_matrix, translation_vector)
+>>>>>>> a2524a27a69cad5522f33816f701d5b8b0e8c05d

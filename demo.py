@@ -6,17 +6,17 @@ from ICP import icp
 
 def main():
     # Import the cloud
-    # mug
+    # # mug
     # pc_source = utils.load_pc('data/mug/cloud_icp_source.csv')
     # pc_target = utils.load_pc('data/mug/cloud_icp_target3.csv')
     # # bunny
-    # pc_source = utils.load_pc('data/bunny/bunny_1.csv')
-    # pc_target = utils.load_pc('data/bunny/bunny_2.csv')
-    # # cat
-    pc_source = utils.load_pc('data/cat/cat_1_f.csv')
-    pc_target = utils.load_pc('data/cat/cat_2_b.csv')
-    
+    # pc_source = utils.load_pc('data/bunny/bunny_0_500.csv')
+    # pc_target = utils.load_pc('data/bunny/bunny_1_500.csv')
+    # cat
+    pc_source = utils.load_pc('data/cat/cat_2_rot_trad.csv')
+    pc_target = utils.load_pc('data/cat/cat_1.csv')
 
+    utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
 
     # Run ICP
     pc_aligned, errors, ps_list, pt_list = icp(pc_source, pc_target)
@@ -30,7 +30,8 @@ def main():
     ps2 = utils.convert_matrix_to_pc(ps)
     pt = utils.convert_pc_to_matrix(pc_target)[:, pt_list]
     pt2 = utils.convert_matrix_to_pc(pt)
-    utils.view_pc([ps2, pt2], None, ['g', 'b'], ['x', '<'])
+    # fig2 = utils.view_pc([ps2, pt2], None, ['g', 'b'], ['x', '<'])
+    # draw_lines_3d_numpy(sss, ttt, fig2)
 
     plt.show()
 

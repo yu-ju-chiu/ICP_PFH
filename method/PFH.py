@@ -76,20 +76,26 @@ class PFH(object):
             point_pairs = point_pairs[point_pairs[:, 0] < point_pairs[:, 1]]
             s = point_pairs[:, 0]
             t = point_pairs[:, 1]
-            ps = pc[s]
-            pt = pc[t]
+            ps = np.asarray(pc[s])
+            pt = np.asarray(pc[t])
             ns = normal[s].squeeze()
             nt = normal[t].squeeze()
+            dot_1 = np.einsum('ij,ij->i', ns, pt - ps)
+            dot_2 = np.einsum('ij,ij->i', nt, ps - pt)
+            indices = np.where(dot_1 > dot_2)[0]
+            ps[indices], pt[indices] = pt[indices], ps[indices]
             u = ns
             d = np.linalg.norm(np.abs(pt - ps), axis=1, keepdims=True)
             temp = (pt - ps)/d
-            v = np.cross(temp, u)
+            v = np.cross(u, temp)
+            v = v / np.linalg.norm(v, axis=1, keepdims=True)
             w = np.cross(u, v)
-            alpha = np.sum(v @ nt.T, axis=1)
-            phi = np.asarray(np.sum(u @ temp.T, axis=1)).squeeze()
-            theta = np.arctan(np.sum(w @ nt.T, axis=1) / np.sum(u @ nt.T, axis=1))
+            alpha = np.sum(v * nt, axis=1)
+            phi = np.asarray(np.sum(u * temp, axis=1))
+            theta = np.arctan(np.sum(w * nt, axis=1) / np.sum(u * nt, axis=1))
             features = np.array([alpha, phi, theta]).T
 
+            # print(features)
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
             
@@ -127,25 +133,9 @@ class PFH(object):
             hist - array of length div^3, represents number of samples per bin
             bin_edges - range(0, 1, 2, ..., (div^3+1)) 
         """
-
-        # preallocate array sizes, create bin_edges
-        # only 3 feature
-        # hist, edges = np.zeros(self.bin**3), np.arange(0,self.bin**3+1)
-        
-        # # find the division thresholds for the histogram
-        # threshold = self.calc_thresholds()
-        # # Loop for every row in f from 0 to N
-        # for j in range(0, feature.shape[0]):
-        #     # calculate the bin index to increment
-        #     index = 0
-        #     for i in range(3):
-        #         index += self.cal_bin(threshold[i, :], feature[j, i]) * (self.bin**(i))
-        #     # Increment histogram at that index
-        #     hist[index] += 1
-        # return hist, edges
-        # ########
-        hist, edges = np.histogramdd(feature, bins=self.bin)
-        # print("hist", hist.flatten())
+        # bin_edges = np.linspace(-1, 1, self.bin+1)
+        bin_edges = [-1, 0, 1]
+        hist, edges = np.histogramdd(feature, bins=(bin_edges, bin_edges, bin_edges))
         return hist.flatten(), edges[0]
 
 
@@ -170,10 +160,65 @@ class PFH(object):
 
         distances = np.linalg.norm(hist_s[filtered_ps_list, np.newaxis] - hist_t[filtered_pt_list], axis=2)
         matchInd = np.argmin(distances, axis=1)
-        distances = np.min(distances, axis=1)
+        # print(matchInd.shape)
 
+        # ## compute E2 set
+        # neighbors = 8
+        # ps = np.asarray(ps)
+        # pt = np.asarray(pt)
+        # candidates = np.argpartition(distances, neighbors, axis=1)[:, :neighbors]
+        # ids = np.array(filtered_ps_list)
+        # pairs = np.array(np.meshgrid(ids, ids)).T.reshape(-1, 2)
+        # pairs = pairs[pairs[:, 0] < pairs[:, 1]]
+        # i = pairs[:, 0]
+        # j = pairs[:, 1]
+        # print(ids.shape, i.shape, j.shape)
+
+        # ids = range(neighbors)
+        # pairs = np.array(np.meshgrid(ids, ids)).T.reshape(-1, 2)
+        # pairs = pairs[pairs[:, 0] < pairs[:, 1]]
+        # r = pairs[:, 0]
+        # s = pairs[:, 1]
+        # val1 = np.linalg.norm(ps[filtered_ps_list][i] - ps[filtered_ps_list][j], axis=1)[:, None]
+        # val2 = np.linalg.norm(pt[filtered_pt_list][candidates[i]][:, r] - pt[filtered_pt_list][candidates[j]][:, s], axis=2)
+        # obj = np.abs(val1 - val2)
+        # print(val1.shape, val2.shape)
+        # min_rs = np.argmin(obj, axis=1)
+        # E2 = np.vstack((i, j, r[min_rs], s[min_rs])).T
+        # print(E2.shape)
+
+        # ## collect pairs from E2 set
+        # print(E2[56232])
+        # pi = ps[filtered_ps_list][E2[0, 0]]
+        # pj = ps[filtered_ps_list][E2[0, 1]]
+        # qi = pt[filtered_pt_list][candidates[E2[0, 0]]][E2[0, 2]]
+        # qj = pt[filtered_pt_list][candidates[E2[0, 1]]][E2[0, 3]]
+
+        # print(pi, pj, qi, qj)
+        # ttt = np.vstack((pi, qi))
+        # sss = np.vstack((pj, qj))
+
+
+        # neighbors = 8
+        # candidates = np.argpartition(distances, neighbors, axis=1)[:, :8]
+        # for candidate in candidates:
+        #     print(candidate)
+
+        #     candidate_ids = candidate
+        #     candidate_pairs = np.array(np.meshgrid(candidate_ids, candidate_ids)).T.reshape(-1, 2)
+        #     candidate_pairs = candidate_pairs[candidate_pairs[:, 0] < candidate_pairs[:, 1]]
+        #     i = candidate_pairs[:, 0]
+        #     j = candidate_pairs[:, 1]
+        #     ps[i] - ps[j]
+
+
+        # plt.bar(np.linspace(0,7,8), hist_s[0], width=0.4)
+        # plt.bar(np.linspace(0.5,7.5,8), hist_t[matchInd[0]], width=0.4)
+        # plt.show()
+
+        distances = np.min(distances, axis=1)
         # Filter matches based on the distance threshold
-        valid_matches = distances < 0.3
+        valid_matches = distances < 1e-6
         matchInd = matchInd[valid_matches]
         distances = distances[valid_matches]
         filtered_ps_list = np.array(filtered_ps_list)[valid_matches].tolist()
