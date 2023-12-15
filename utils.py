@@ -80,15 +80,29 @@ def view_pc(pcs, fig=None, color='b', marker='o', title=None):
         for pt in pc:
             x.append(pt[0, 0])
             y.append(pt[1, 0])
-            z.append(pt[2, 0])
+            z.append(pt[2, 0])         
 
         ax.scatter3D(x, y, z, color=c, marker=m, s=2, alpha=0.6)
 
+    # ax.scatter(x, y, z, color=c, marker=m, s=2, alpha=0.6)
     # Set the labels
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     
+    # make the xyz have the same diffirence
+    x = numpy.array(x)
+    y = numpy.array(y)
+    z = numpy.array(z)
+    max_range = numpy.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() / 2.0
+    mid_x = (x.max()+x.min()) * 0.5
+    mid_y = (y.max()+y.min()) * 0.5
+    mid_z = (z.max()+z.min()) * 0.5
+    ax.set_xlim(mid_x - max_range, mid_x + max_range)
+    ax.set_ylim(mid_y - max_range, mid_y + max_range)
+    ax.set_zlim(mid_z - max_range, mid_z + max_range)
+    #############################################################################################3
+
     # Update the figure
     plt.draw()
     plt.pause(0.05)

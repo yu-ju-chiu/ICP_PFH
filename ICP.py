@@ -33,6 +33,8 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
     for iterations in range(max_iterations):
         start = time.process_time()
         temp_error = error
+        ps_list = np.arange(0,len(pc_source),1) 
+        pt_list = np.arange(0,len(pc_target),1) 
 
         if cfg['Method'] == "PFH":
             # Point Feature Histograms algorithm
