@@ -72,6 +72,9 @@ def view_pc(pcs, fig=None, color='b', marker='o', title=None):
         ax = fig.gca()
         
 
+    x_all = []
+    y_all = []
+    z_all = []
     # Draw each point cloud
     for pc, c, m in zip(pcs, color, marker):
         x = []
@@ -80,20 +83,22 @@ def view_pc(pcs, fig=None, color='b', marker='o', title=None):
         for pt in pc:
             x.append(pt[0, 0])
             y.append(pt[1, 0])
-            z.append(pt[2, 0])         
+            z.append(pt[2, 0])
+            x_all.append(pt[0, 0])
+            y_all.append(pt[1, 0])
+            z_all.append(pt[2, 0])          
 
         ax.scatter3D(x, y, z, color=c, marker=m, s=2, alpha=0.6)
 
-    # ax.scatter(x, y, z, color=c, marker=m, s=2, alpha=0.6)
     # Set the labels
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     
     # make the xyz have the same diffirence
-    x = numpy.array(x)
-    y = numpy.array(y)
-    z = numpy.array(z)
+    x = numpy.array(x_all)
+    y = numpy.array(y_all)
+    z = numpy.array(z_all)    
     max_range = numpy.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() / 2.0
     mid_x = (x.max()+x.min()) * 0.5
     mid_y = (y.max()+y.min()) * 0.5
