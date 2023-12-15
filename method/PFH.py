@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
 import scipy.special as sp
+import matplotlib.pyplot as plt
+from scipy.special import rel_entr
 
 class PFH(object):
     """Parent class for PFH"""
@@ -70,8 +72,8 @@ class PFH(object):
         for i in pc_list:
             N_features = sp.comb(self.num_neighbors + 1, 2)
             point_ids = np.append(indNeigh[i], [i])
-            point_pairs = np.array(np.meshgrid(point_ids, point_ids)).reshape(-1, 2)
-            point_pairs = point_pairs[point_pairs[:, 0] != point_pairs[:, 1]]
+            point_pairs = np.array(np.meshgrid(point_ids, point_ids)).T.reshape(-1, 2)
+            point_pairs = point_pairs[point_pairs[:, 0] < point_pairs[:, 1]]
             s = point_pairs[:, 0]
             t = point_pairs[:, 1]
             ps = pc[s]
@@ -87,12 +89,30 @@ class PFH(object):
             phi = np.asarray(np.sum(u @ temp.T, axis=1)).squeeze()
             theta = np.arctan(np.sum(w @ nt.T, axis=1) / np.sum(u @ nt.T, axis=1))
             features = np.array([alpha, phi, theta]).T
+            # print("features", features)
 
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
+            # print("histograms[i, :] ", histograms[i, :])
+            # print("edges", edges)
+        # print("histograms", histograms.shape)
         
         return histograms
-    
+    def plot_hist(self, hist_s, hist_t):
+
+        WIDTH = 0.4
+        index_s = np.arange(1,(self.bin**3)+1,1)
+        index_t = index_s - WIDTH/2
+        for i in range(1):
+
+            plt.show()
+            # plt.hist(histograms[0], bins=self.bin, density=True)
+            plt.bar(index_s, hist_s[i], color='blue' ,width=WIDTH, align='edge')
+            plt.bar(index_t, hist_t[i], color='red' ,width=WIDTH)
+            plt.xlabel('Bins')  
+            plt.ylabel('Ration of point one bin')
+        
+
     def calc_thresholds(self):
         """
         :returns: feature's thresholds (3x(self.bin-1))
@@ -114,8 +134,26 @@ class PFH(object):
             bin_edges - range(0, 1, 2, ..., (div^3+1)) 
         """
 
+        # preallocate array sizes, create bin_edges
+        # only 3 feature
+        # hist, edges = np.zeros(self.bin**3), np.arange(0,self.bin**3+1)
+        
+        # # find the division thresholds for the histogram
+        # threshold = self.calc_thresholds()
+        # # Loop for every row in f from 0 to N
+        # for j in range(0, feature.shape[0]):
+        #     # calculate the bin index to increment
+        #     index = 0
+        #     for i in range(3):
+        #         index += self.cal_bin(threshold[i, :], feature[j, i]) * (self.bin**(i))
+        #     # Increment histogram at that index
+        #     hist[index] += 1
+        # return hist, edges
+        # ########
         hist, edges = np.histogramdd(feature, bins=self.bin)
+        # print("hist", hist.flatten())
         return hist.flatten(), edges[0]
+
 
     def match(self, ps, pt, curv_thres):
         """Find matches from source to target points
@@ -130,9 +168,11 @@ class PFH(object):
         norm_s, ind_nei_s, filtered_ps_list = self.calc_normals(ps, curv_thres)
         hist_s = self.calcHistArray(ps, norm_s, ind_nei_s, filtered_ps_list)
         
+        
         print("...Processing target point cloud...\n")
         norm_t, ind_nei_t, filtered_pt_list = self.calc_normals(pt, curv_thres)
         hist_t = self.calcHistArray(pt, norm_t, ind_nei_t, filtered_pt_list)
+        # self.plot_hist(hist_s, hist_t)
 
         distances = np.linalg.norm(hist_s[filtered_ps_list, np.newaxis] - hist_t[filtered_pt_list], axis=2)
         matchInd = np.argmin(distances, axis=1)

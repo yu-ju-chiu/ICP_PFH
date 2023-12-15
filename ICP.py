@@ -15,6 +15,7 @@ def cal_error(Cp, Cq):
     """
     err = np.linalg.norm(Cp-Cq, axis = 1)
     # print("err", err.shape)
+    err = err * 1e-3
     err = np.sum(err**2)
     # print("err", err.shape)
     return err
