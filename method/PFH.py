@@ -89,14 +89,10 @@ class PFH(object):
             phi = np.asarray(np.sum(u @ temp.T, axis=1)).squeeze()
             theta = np.arctan(np.sum(w @ nt.T, axis=1) / np.sum(u @ nt.T, axis=1))
             features = np.array([alpha, phi, theta]).T
-            # print("features", features)
 
             hist, edges = self.calc_hist(features)
             histograms[i, :] = hist / (N_features)
-            # print("histograms[i, :] ", histograms[i, :])
-            # print("edges", edges)
-        # print("histograms", histograms.shape)
-        
+            
         return histograms
     def plot_hist(self, hist_s, hist_t):
 
@@ -106,7 +102,6 @@ class PFH(object):
         for i in range(1):
 
             plt.show()
-            # plt.hist(histograms[0], bins=self.bin, density=True)
             plt.bar(index_s, hist_s[i], color='blue' ,width=WIDTH, align='edge')
             plt.bar(index_t, hist_t[i], color='red' ,width=WIDTH)
             plt.xlabel('Bins')  
