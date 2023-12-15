@@ -1,5 +1,5 @@
 N_neighbors: 8
 Radius: 100
 Bin: 2
-Method: "normal"
+Method: "PFH"
 Curvature_thres: 0.59

@@ -15,7 +15,7 @@ def cal_error(Cp, Cq):
     """
     err = np.linalg.norm(Cp-Cq, axis = 1)
     # print("err", err.shape)
-    err = err * 1e-3
+    err = err
     err = np.sum(err**2)
     # print("err", err.shape)
     return err
@@ -33,7 +33,7 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
     for iterations in range(max_iterations):
         start = time.process_time()
         temp_error = error
-        ps_list = np.arange(0,len(pc_source),1) 
+        ps_list = np.arange(0,len(pc_aligned),1) 
         pt_list = np.arange(0,len(pc_target),1) 
 
         if cfg['Method'] == "PFH":
@@ -85,38 +85,3 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
         print("Time per iteration: ", end - start)
         print("===============================\n\n")
     return pc_aligned, errors, ps_list, pt_list
-
-
-# def main():
-#     # Import the cloud
-#     pc_source = utils.load_pc('data/mug/cloud_icp_source.csv')
-#     pc_target = utils.load_pc('data/mug/cloud_icp_target3.csv') # Change this to load in a different target
-
-#     utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
-
-#     # Run ICP
-#     pc_aligned, errors, ps_list, pt_list = icp(pc_source, pc_target)
-
-#     # Plot the original pc
-#     pc_aligned = utils.convert_matrix_to_pc(pc_aligned.T)
-#     utils.view_pc([pc_aligned, pc_target], None, ['b', 'r'], ['o', '^'])
-
-#     # Plot simplify point cloud
-#     ps = utils.convert_pc_to_matrix(pc_source)[:, ps_list]
-#     ps2 = utils.convert_matrix_to_pc(ps)
-#     pt = utils.convert_pc_to_matrix(pc_target)[:, pt_list]
-#     pt2 = utils.convert_matrix_to_pc(pt)
-#     utils.view_pc([ps2, pt2], None, ['g', 'b'], ['x', '<'])
-
-#     plt.show()
-
-#     # Plot the result
-#     index = np.arange(1,len(errors)+1,1) 
-#     plt.plot(index, errors, color='blue')
-#     plt.xlabel('Iteration')  
-#     plt.ylabel('Error')  
-#     plt.show()
-
-
-# if __name__ == '__main__':
-#     main()

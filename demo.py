@@ -7,14 +7,14 @@ from ICP import icp
 def main():
     # Import the cloud
     # # mug
-    pc_source = utils.load_pc('data/mug/cloud_icp_source.csv')
-    pc_target = utils.load_pc('data/mug/cloud_icp_target3.csv')
+    # pc_source = utils.load_pc('data/mug/cloud_icp_source.csv')
+    # pc_target = utils.load_pc('data/mug/cloud_icp_target3.csv')
     # # bunny
     # pc_source = utils.load_pc('data/bunny/bunny_0_500.csv')
     # pc_target = utils.load_pc('data/bunny/bunny_1_500.csv')
-    # cat
-    # pc_source = utils.load_pc('data/cat/cat_2_rot_trad.csv')
-    # pc_target = utils.load_pc('data/cat/cat_1.csv')
+    # # cat
+    pc_source = utils.load_pc('data/cat/cat_2_rot_trad.csv')
+    pc_target = utils.load_pc('data/cat/cat_1.csv')
 
     utils.view_pc([pc_source, pc_target], None, ['b', 'r'], ['o', '^'])
 
