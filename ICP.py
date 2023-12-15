@@ -37,7 +37,7 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
             # Point Feature Histograms algorithm
             ###################################
             matching = PFH(cfg['Bin'], cfg['N_neighbors'], cfg['Radius']) 
-            indices, distances, ps_list, pt_list = matching.match(pc_aligned, pc_target, cfg['Curvature_thres'])
+            indices, distances, ps_list, pt_list= matching.match(pc_aligned, pc_target, cfg['Curvature_thres'])
             ###################################
         else:
             # tranditional mehtod: cal distance
