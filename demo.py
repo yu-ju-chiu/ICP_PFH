@@ -24,7 +24,6 @@ def main():
 
     # Run ICP
     pc_aligned, errors, ps_list, pt_list, sss, ttt = icp(pc_source, pc_target)
-    print(sss, ttt)
     draw_lines_3d_numpy(sss, ttt, fig1)
 
     # Plot the original pc
