@@ -212,8 +212,12 @@ class PFH(object):
         #     ps[i] - ps[j]
 
 
-        # plt.bar(np.linspace(0,7,8), hist_s[0], width=0.4)
-        # plt.bar(np.linspace(0.5,7.5,8), hist_t[matchInd[0]], width=0.4)
+        # plt.bar(np.linspace(0.9,7.9,8), hist_s[0], width=0.2)
+        # plt.bar(np.linspace(1.1,8.1,8), hist_t[matchInd[0]], width=0.2)
+        # plt.legend(['Point #0 in source cloud', 'Corresponding point in target'])
+        # plt.ylabel('Ration of point in one bin (%)')
+        # plt.xlabel('Bins') 
+        # plt.title('PFH matching')
         # plt.show()
 
         distances = np.min(distances, axis=1)

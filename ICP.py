@@ -30,7 +30,7 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
     errors = []
     error = 0
     
-    for iterations in range(max_iterations):
+    for iterations in range(1):
         start = time.process_time()
         temp_error = error
         ps_list = np.arange(0,len(pc_aligned),1) 
@@ -52,6 +52,9 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
         # Extract corresponding points
         source_points = pc_aligned[ps_list]
         target_points = pc_target[pt_list][indices, :]
+        if iterations == 0:
+            sss = source_points
+            ttt = target_points
 
         # calculate error
         # error = np.linalg.norm(distances)
@@ -84,4 +87,4 @@ def icp(pc_source, pc_target, max_iterations=10, convergence_threshold=1e-4):
         end = time.process_time()
         print("Time per iteration: ", end - start)
         print("===============================\n\n")
-    return pc_aligned, errors, ps_list, pt_list
+    return pc_aligned, errors, ps_list, pt_list, sss, ttt
